@@ -246,9 +246,9 @@ Edit `ember/config.py` to adjust scoring behavior:
 | `UTILITY_WEIGHT` | 0.15 | How much utility feedback affects ranking |
 | `SHADOW_ARCHIVE_THRESHOLD` | 0.95 | Shadow load above which embers auto-archive |
 
-## Hooks (Claude Code)
+## Hooks (Claude Code, Unix/macOS)
 
-Ember ships with hooks for Claude Code's lifecycle events:
+Ember ships with hooks for Claude Code's lifecycle events. Hooks require Unix-like systems (macOS, Linux) — the core MCP server is cross-platform, but hooks use `os.fork()`, bash, and optionally tmux/jq:
 
 | Hook | Event | What it does |
 |------|-------|-------------|

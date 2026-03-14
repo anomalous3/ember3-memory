@@ -5,13 +5,13 @@ foundation tier.
 
 ## Instructions
 
-1. Call `ember_synthesis_scan` to get structured data about the graph.
+1. Call `ember_dream_scan` to get structured data about the graph.
    Results are randomized — each cycle sees a different slice of the graph.
 
 ### Phase A: Theme Emergence
 2. Look at the `recent_embers` list. Identify 2-3 convergent threads or
    surprising cross-domain connections among them.
-3. For each theme, call `ember_synthesis_save` with:
+3. For each theme, call `ember_dream_save` with:
    - save_type: "theme"
    - name: "[theme] Theme Name (5-10 words)"
    - content: The insight (1-2 sentences) + "This theme connects: [ember names]"
@@ -24,14 +24,14 @@ foundation tier.
    - COMPLEMENTARY: different but compatible perspectives
 5. For contradictions: determine which claim prevails (higher access_count wins;
    if tied, newer wins). Write a resolution paragraph that preserves what's
-   correct from both. Call `ember_synthesis_save` with:
+   correct from both. Call `ember_dream_save` with:
    - save_type: "resolution"
    - stale_ember_id: the ID of the weaker ember to mark stale
    - source_ember_ids: both ember IDs
 6. For duplicates: consolidate them. The weaker ember (lower access_count; if
    tied, shorter content; if still tied, older) gets retired. Write merged
    content that preserves ALL unique information from both, using the stronger
-   as the base. Call `ember_synthesis_save` with:
+   as the base. Call `ember_dream_save` with:
    - save_type: "consolidation"
    - content: the merged content
    - stale_ember_id: the weaker ember ID
@@ -43,7 +43,7 @@ foundation tier.
 7. Look at the `dense_clusters` list. For each dense cluster, ask:
    what interesting question does this cluster leave unanswered?
 8. Generate exactly ONE pointed, testable question per cluster (not vague).
-   Call `ember_synthesis_save` with:
+   Call `ember_dream_save` with:
    - save_type: "wonder"
    - name: "[wonder] Question text (truncated)"
    - content: The full question

@@ -106,9 +106,8 @@ async def _init_centroids(db: Database) -> None:
         import logging
         logging.getLogger(__name__).warning(
             f"Database has {ember_count} embers but no centroids. "
-            "Run migrate.py to import centroids from the old system, "
-            "or centroids will be random (semantically meaningless). "
-            "Generating random centroids as fallback."
+            "Generating random centroids as fallback — run "
+            "ember_recompute_centroids after startup for proper clustering."
         )
 
     rng = np.random.default_rng(seed=42)

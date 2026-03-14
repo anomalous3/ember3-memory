@@ -86,6 +86,4 @@ echo '    "args": ["-m", "ember"],'
 echo '    "env": { "EMBER_AGENT": "claude" }'
 echo '  }'
 echo ""
-echo "To migrate existing ember-full data:"
-echo "  $FULL_PYTHON migrate.py --source ~/.ember --execute"
 echo ""
