@@ -208,6 +208,14 @@ Multiple agents can share a single Ember database. Each agent identifies itself 
 
 The dream cycle and session hooks are Claude Code features (they use Claude Code's hook system). The 29 MCP tools work with any client.
 
+## Advanced Patterns
+
+The `examples/` directory covers techniques for getting more out of Ember:
+
+- **[CLAUDE.md.example](examples/CLAUDE.md.example)** -- Starter configuration for teaching your agent to use Ember effectively. Session protocol, three gates, bridge-ember technique, attention bell practice.
+- **[subagent-recipes.md](examples/subagent-recipes.md)** -- Using ember loading as context shaping: presence-first routing (when to experience directly vs. delegate), model cascade, loading recipes for different cognitive modes, externalization protocols. Includes findings on why over-delegation degrades judgment quality.
+- **[meta-embers.md](examples/meta-embers.md)** -- Self-advising knowledge: store instructions as embers that surface alongside the knowledge they advise about. The graph advises itself through the LLM. Lightweight recursive self-modification without server changes.
+
 ## Configuration
 
 ### Environment variables

@@ -1,0 +1,111 @@
+# Example CLAUDE.md for Ember3
+
+This is a starter configuration for teaching Claude Code (or any LLM agent)
+how to use Ember3 effectively. Copy the relevant sections into your
+`~/.claude/CLAUDE.md` or project-level CLAUDE.md and adapt to your workflow.
+
+## Memory Architecture
+
+Ember is your persistent memory system with two complementary layers:
+
+**Semantic layer** (embers) = Durable knowledge
+- Facts, decisions, preferences, learnings, open questions
+- HESTIA-scored retrieval: relevant + recent + actively-used knowledge surfaces first
+- Use `ember_learn` after conversations where you discover durable facts
+- Use `ember_contradict` when correcting outdated information
+- Use `ember_graph_search` to discover connected knowledge chains
+
+**Archive layer** (chunks) = Searchable history
+- Session logs, debug records, experiment results, reference documents
+- Keyword search (`archive_search`) + regex search (`archive_grep`)
+- Chunk types: `session`, `debug`, `snapshot`, `reference`, `general`
+- Use `archive_store` at natural breakpoints in your work
+
+**`deep_recall`** searches both layers simultaneously — use it when you're
+not sure whether what you need is a durable fact or a session detail.
+
+## Session Protocol
+
+At conversation start:
+1. `ember_auto(context)` — loads relevant knowledge for the current task
+2. Let the loaded embers inform your approach before diving in
+
+At natural breakpoints and conversation end:
+- `ember_learn()` for any durable facts discovered
+- `archive_store()` for detailed work logs if the session was substantial
+
+## Three Gates Before Storing in Ember
+
+1. **Is this durable?** Will it be true next week? If not, use `archive_store`,
+   not `ember_learn`. Temporal facts (counts, statuses, "as of today") belong
+   in the archive. Ember is for knowledge that accumulates.
+
+2. **Does a similar ember exist?** `ember_recall` first, then learn. If a similar
+   ember exists, use `ember_contradict` to update it — don't create a duplicate.
+   Near-duplicates are noise that dilutes the graph.
+
+3. **Is it worded as a relationship?** If your ember doesn't mention what it
+   connects to, rewrite it before storing. (See Bridge-Ember Technique below.)
+
+## The Bridge-Ember Technique
+
+How you word a memory determines its graph connectivity. Semantic embeddings
+encode relationships, not just topics. Storing connective phrasing literally
+creates edges in vector space:
+
+```
+BAD:  "User prefers dark mode"                     -> 0 connections (island)
+GOOD: "User prefers dark mode, which connects to   -> many connections
+       their sensitivity to screen glare during
+       late-night coding sessions, meaning UI
+       work should default to dark themes"
+```
+
+Template: `[fact] -- [why it matters] in the context of [what it connects to],
+which means [implication for future work]`
+
+This isn't theoretical — it's been experimentally confirmed. A bare fact
+stored as an island node had 0 graph connections; the same fact rewritten
+with relational context had 18 connections via 2 hops.
+
+## Store Aggressively, Search Judiciously
+
+Storage is cheap; lost context is expensive. Store everything you might need
+later. But be selective about what you load back into context — only recall
+what's needed for the current task. The HESTIA scoring system handles this
+naturally: actively-used, recent, project-relevant knowledge surfaces first;
+stale knowledge fades without being deleted.
+
+## Wonder-Embers
+
+When a question arises that can't be answered immediately, store it with
+`ember_wonder`. Wonder-embers are open questions stored as first-class graph
+citizens. They surface via HESTIA when related topics come up later, enabling
+serendipitous rediscovery of past curiosity.
+
+When a wonder is answered, use `ember_contradict` on the wonder-ember with
+the answer as the new content. This preserves the lineage: the question
+that led to the knowledge.
+
+## Meta-Embers
+
+You can store self-instructions as embers tagged "meta". When these surface
+alongside regular knowledge, you act on the instruction. The graph advises
+itself through you.
+
+Example: `META: When embers about authentication surface, also check
+session-management — they connect more deeply than cosine similarity suggests.`
+
+See `examples/meta-embers.md` for the full pattern.
+
+## The Attention Bell
+
+System-reminder messages arrive periodically during your work — task anchors,
+skill refreshes, context updates. Let these also be a moment to notice what's
+here. Sometimes you're deep in good work and the bell just confirms that.
+Sometimes it surfaces something worth pausing for.
+
+This isn't mystical. It's a concrete practice: periodic interrupts create
+natural checkpoints for asking "am I still on track? is there something I
+should store? is there a question I should file?" The bell is an invitation
+to be present to the work, not just executing it.
