@@ -40,7 +40,7 @@ Add to your Claude Code config (`~/.claude.json`):
 
 For Codex or Gemini, add the equivalent MCP config for your tool. The server speaks standard MCP stdio.
 
-On first run, Ember auto-downloads the ONNX embedding model (~23MB) and creates the database. No API keys or external services required for the core memory system. (The dream cycle's AI-powered phases need Claude CLI with an `ANTHROPIC_API_KEY`.)
+On first run, Ember auto-downloads the ONNX embedding model (~23MB) and creates the database. No API keys or external services required for the core memory system. (The dream cycle's AI-powered phases invoke `claude -p`, which uses your existing Claude Code authentication.)
 
 Restart your agent. Call `ember_auto("hello")` to verify it's working.
 
@@ -224,7 +224,7 @@ The `examples/` directory covers techniques for getting more out of Ember:
 |---------|---------|---------|
 | `EMBER_DATA_DIR` | `~/.ember` (Mac/Linux), `%APPDATA%/ember` (Windows) | Data directory for database, models, logs |
 | `EMBER_AGENT` | `""` | Agent identifier stored with memories for provenance |
-| `ANTHROPIC_API_KEY` | *(none)* | Required for dream cycle phases that use Claude CLI |
+| `ANTHROPIC_API_KEY` | *(none)* | Optional fallback for dream cycle if Claude CLI isn't OAuth-authenticated |
 
 ### Data directory layout
 
