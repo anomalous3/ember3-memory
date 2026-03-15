@@ -218,6 +218,9 @@ async def _fetch_and_rerank(
         ember = await _db.get_ember(ember_id)
         if not ember:
             continue
+        # Stale embers don't enter the candidate set — they're dead weight
+        if ember["is_stale"]:
+            continue
 
         cos_sim = l2_to_cosine(dist)
         cell_vitality = cell_vitalities.get(ember["cell_id"], 0.0)
@@ -574,7 +577,10 @@ async def ember_wonder(question: str, tags: str = "", context: str = "") -> str:
 
 @mcp.tool()
 async def ember_contradict(ember_id: str, new_content: str, reason: str = "") -> str:
-    """Mark an existing memory as stale and store an updated version.
+    """Mark an existing memory as stale and store a corrected version.
+
+    Lineage is tracked via tags (supersedes:{old_id}), not foreign keys.
+    Already-stale embers are deranked further rather than re-contradicted.
 
     Args:
         ember_id: The ID of the ember to mark stale
@@ -587,49 +593,53 @@ async def ember_contradict(ember_id: str, new_content: str, reason: str = "") ->
     if not old_ember:
         return f"Ember {ember_id} not found."
 
+    # Already stale — don't re-contradict, just confirm it's buried
+    if old_ember["is_stale"]:
+        if old_ember["shadow_load"] < 1.0:
+            await _db.update_ember(ember_id, shadow_load=1.0)
+        return (
+            f"Ember '{old_ember['name']}' is already stale "
+            f"(reason: {old_ember.get('stale_reason', 'unknown')}). "
+            f"If the *correction* is wrong, contradict the newer ember instead."
+        )
+
     await _archive_decayed_ember(old_ember)
 
     vec, embedding = _embed(new_content)
     cell_id = await _db.assign_cell(embedding)
     new_eid = str(uuid.uuid4())
 
-    # Store new version FIRST (so FK reference from old->new is valid)
+    # Track lineage via tags — no FK references between embers
+    new_tags = list(old_ember["tags"]) + [f"supersedes:{ember_id}"]
+
     await _db.save_ember(
         ember_id=new_eid, name=old_ember["name"], content=new_content,
-        tags=old_ember["tags"], cell_id=cell_id,
+        tags=new_tags, cell_id=cell_id,
         importance=old_ember["importance"], source="manual",
-        embedding=embedding, supersedes_id=ember_id,
+        embedding=embedding,
     )
 
-    # Mark old as stale (now safe — new_eid exists for shadowed_by FK)
+    # Mark old as stale — shadow_load=1.0 ensures HESTIA won't score it,
+    # and _fetch_and_rerank filters stale embers before scoring anyway
     await _db.update_ember(
         ember_id, content_changed=True,
         is_stale=True,
         stale_reason=reason or "Superseded by newer information",
         shadow_load=1.0,
-        shadowed_by=new_eid,
         shadow_updated_at=datetime.now(timezone.utc).isoformat(),
     )
 
-    await _db.save_edge(ember_id, new_eid, "supersedes", 1.0)
-
-    # Clean up edges from the stale ember — prevents wrong dream bridges
-    # and KG edges from distorting future retrievals (time-knife finding:
-    # stale edges accumulate in the graph if not cleaned on contradict)
+    # Transfer related edges to the new ember so graph connectivity is preserved
     old_edges = await _db.get_edges(ember_id)
     for edge in old_edges:
-        # Keep the supersedes edge we just created; remove everything else
-        if edge["edge_type"] == "supersedes" and edge["target_id"] == new_eid:
-            continue
-        # Transfer 'related' edges to the new ember so lineage is preserved
         if edge["edge_type"] == "related":
             other_id = edge["target_id"] if edge["source_id"] == ember_id else edge["source_id"]
             await _db.save_edge(new_eid, other_id, "related", edge["weight"])
 
-    # Remove all old edges except the supersedes link
+    # Remove all edges from the stale ember
     await _db.conn.execute(
-        "DELETE FROM edges WHERE (source_id = ? OR target_id = ?) AND NOT (source_id = ? AND target_id = ? AND edge_type = 'supersedes')",
-        (ember_id, ember_id, ember_id, new_eid),
+        "DELETE FROM edges WHERE source_id = ? OR target_id = ?",
+        (ember_id, ember_id),
     )
     await _db.conn.commit()
 
@@ -638,7 +648,7 @@ async def ember_contradict(ember_id: str, new_content: str, reason: str = "") ->
 
     return (
         f"Updated memory: '{old_ember['name']}'. "
-        f"Old version fully shadowed. New version: {new_eid}"
+        f"Old version marked stale. New version: {new_eid}"
     )
 
 

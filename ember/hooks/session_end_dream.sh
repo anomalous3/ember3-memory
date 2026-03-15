@@ -259,7 +259,7 @@ asyncio.run(recompute())
             --model sonnet \
             --no-session-persistence \
             --dangerously-skip-permissions \
-            --allowedTools "mcp__ember__ember_dream_scan,mcp__ember__ember_dream_save,mcp__ember__archive_store,mcp__ember__ember_recall,mcp__ember__ember_read,mcp__ember__ember_contradict,mcp__ember__ember_delete,mcp__ember__ember_wonder" \
+            --allowedTools "mcp__ember__ember_list,mcp__ember__ember_read,mcp__ember__ember_recall,mcp__ember__ember_contradict,mcp__ember__ember_delete,mcp__ember__ember_wonder,mcp__ember__ember_health,mcp__ember__ember_drift_check,mcp__ember__archive_store" \
             < "$HOOKS_DIR/synthesis-prompt.md" \
             2>&1
 
