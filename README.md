@@ -321,7 +321,7 @@ Optional: [thefuzz](https://pypi.org/project/thefuzz/) for fuzzy string matching
 
 ## Lineage
 
-Ember3 originated as a fork of [Arkya-AI/ember-mcp](https://github.com/Arkya-AI/ember-mcp) (no longer available). The original provided basic semantic memory with FAISS indexing. From there, development diverged substantially:
+Ember3 originated as a fork of https://github.com/Sysbaia/ember-mcp-memoire-claude. The original provided basic semantic memory with FAISS indexing. From there, development diverged substantially:
 
 - **Ember 1.x** (fork) -- JSON files per memory, FAISS index, numpy vector storage, separate BM25 library for archive search, YAML-based archive chunks. Functional but fragile — state scattered across a dozen file formats.
 - **Ember 2.x** -- Introduced HESTIA scoring, shadow-decay framework, the dream cycle, Voronoi cell topology, utility feedback, bridge-ember technique, and the archive layer. The ideas that define the system.
